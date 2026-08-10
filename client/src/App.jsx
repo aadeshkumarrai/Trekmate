@@ -1,0 +1,127 @@
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Chat from "./pages/Chat";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminTreks from "./pages/AdminTreks";
+import AdminTrekForm from "./pages/AdminTrekForm";
+import AdminBookings from "./pages/AdminBookings";
+import StaffDashboard from "./pages/StaffDashboard";
+import UserDashboard from "./pages/UserDashboard";
+import UserTreks from "./pages/UserTreks";
+import UserBookings from "./pages/UserBookings";
+import UserHistory from "./pages/UserHistory";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+const adminRoute = (component) => (
+  <ProtectedRoute allowedRoles={["admin"]}>
+    {component}
+  </ProtectedRoute>
+);
+
+const userRoute = (component) => (
+  <ProtectedRoute allowedRoles={["user"]}>
+    {component}
+  </ProtectedRoute>
+);
+
+function App() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <Navigate to="/login" replace />
+        }
+      />
+
+      <Route path="/login" element={<Login />} />
+
+      <Route
+        path="/register"
+        element={<Register />}
+      />
+
+      <Route
+        path="/admin"
+        element={adminRoute(<AdminDashboard />)}
+      />
+
+      <Route
+        path="/admin/staff"
+        element={adminRoute(<AdminDashboard />)}
+      />
+
+      <Route
+        path="/admin/treks"
+        element={adminRoute(<AdminTreks />)}
+      />
+
+      <Route
+        path="/admin/treks/new"
+        element={adminRoute(<AdminTrekForm />)}
+      />
+
+      <Route
+        path="/admin/treks/:id/edit"
+        element={adminRoute(<AdminTrekForm />)}
+      />
+
+      <Route
+        path="/admin/bookings"
+        element={adminRoute(<AdminBookings />)}
+      />
+
+      <Route
+        path="/staff/*"
+        element={
+          <ProtectedRoute allowedRoles={["staff"]}>
+            <StaffDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard"
+        element={userRoute(<UserDashboard />)}
+      />
+
+      <Route
+        path="/treks"
+        element={userRoute(<UserTreks />)}
+      />
+
+      <Route
+        path="/bookings"
+        element={userRoute(<UserBookings />)}
+      />
+
+      <Route
+        path="/history"
+        element={userRoute(<UserHistory />)}
+      />
+
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="*"
+        element={
+          <Navigate to="/login" replace />
+        }
+      />
+    </Routes>
+  );
+}
+
+export default App;

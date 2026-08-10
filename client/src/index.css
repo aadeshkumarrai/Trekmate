@@ -1158,3 +1158,101 @@ a {
     height: 36px;
   }
 }
+/* ===== Staff dashboard table and buttons ===== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 17px 14px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(118, 168, 151, 0.14);
+}
+
+.data-table th {
+  color: #7f938b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.data-table td {
+  color: #e7f2ee;
+  font-size: 0.95rem;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 42px;
+  padding: 0 17px;
+  border-radius: 11px;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.primary-button {
+  border: 1px solid #55deb0;
+  background: #55deb0;
+  color: #052119;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #70e9c0;
+  transform: translateY(-1px);
+}
+
+.primary-button.small {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 0.86rem;
+}
+
+.secondary-button {
+  border: 1px solid rgba(104, 229, 184, 0.28);
+  background: rgba(8, 36, 28, 0.72);
+  color: #d8eee6;
+}
+
+.secondary-button:hover:not(:disabled) {
+  border-color: #55deb0;
+  color: #55deb0;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .data-table {
+    min-width: 760px;
+  }
+
+  .panel-heading > .secondary-button {
+    width: 100%;
+  }
+}

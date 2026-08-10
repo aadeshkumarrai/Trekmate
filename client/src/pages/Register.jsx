@@ -56,7 +56,7 @@ function Register() {
         return;
       }
 
-      navigate("/chat");
+      navigate("/dashboard", { replace: true });
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||

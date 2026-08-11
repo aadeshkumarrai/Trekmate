@@ -20,9 +20,19 @@ const navigation = [
     icon: "▣",
   },
   {
+    label: "Users",
+    path: "/admin/users",
+    icon: "♙",
+  },
+  {
+    label: "Staff",
+    path: "/admin/team",
+    icon: "♟",
+  },
+  {
     label: "Staff Requests",
     path: "/admin/staff",
-    icon: "♙",
+    icon: "♧",
   },
   {
     label: "AI Assistant",
@@ -31,37 +41,37 @@ const navigation = [
   },
 ];
 
+const initialStats = {
+  totalTreks: 0,
+  totalUsers: 0,
+  pendingStaff: 0,
+  totalBookings: 0,
+};
+
 function AdminDashboard() {
-  const [staff, setStaff] = useState([]);
-
-  const [stats, setStats] = useState({
-    totalTreks: 0,
-    totalUsers: 0,
-    pendingStaff: 0,
-    totalBookings: 0,
-  });
-
+  const [staffRequests, setStaffRequests] = useState([]);
+  const [stats, setStats] = useState(initialStats);
   const [loading, setLoading] = useState(true);
-  const [actionId, setActionId] = useState("");
+  const [updatingId, setUpdatingId] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const fetchDashboardData = async () => {
+    setLoading(true);
+    setError("");
+
     try {
-      setLoading(true);
-      setError("");
+      const [staffResponse, statsResponse] = await Promise.all([
+        api.get("/admin/staff?status=pending"),
+        api.get("/admin/stats"),
+      ]);
 
-      const [staffResponse, statsResponse] =
-        await Promise.all([
-          api.get("/admin/staff?status=pending"),
-          api.get("/admin/stats"),
-        ]);
-
-      setStaff(staffResponse.data.staff);
-      setStats(statsResponse.data.stats);
+      setStaffRequests(staffResponse.data.staff || []);
+      setStats(statsResponse.data.stats || initialStats);
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||
-          "Unable to load dashboard data"
+          "Unable to load admin dashboard"
       );
     } finally {
       setLoading(false);
@@ -72,68 +82,86 @@ function AdminDashboard() {
     fetchDashboardData();
   }, []);
 
-  const updateStaff = async (staffId, action) => {
-    try {
-      setActionId(staffId);
-      setError("");
+  const updateStaffStatus = async (staffId, action) => {
+    setUpdatingId(staffId);
+    setError("");
+    setSuccess("");
 
-      await api.patch(
+    try {
+      const { data } = await api.patch(
         `/admin/staff/${staffId}/${action}`
       );
 
-      await fetchDashboardData();
+      setSuccess(data.message);
+
+      setStaffRequests((currentRequests) =>
+        currentRequests.filter(
+          (request) => request._id !== staffId
+        )
+      );
+
+      setStats((currentStats) => ({
+        ...currentStats,
+        pendingStaff: Math.max(
+          0,
+          currentStats.pendingStaff - 1
+        ),
+      }));
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||
-          `Unable to ${action} staff account`
+          `Unable to ${action} staff request`
       );
     } finally {
-      setActionId("");
+      setUpdatingId("");
     }
   };
 
   return (
     <DashboardLayout
-      title="Admin Dashboard"
       navigation={navigation}
+      eyebrow="ADMIN PANEL"
+      title="Admin Dashboard"
     >
+      {error && <p className="form-error">{error}</p>}
+      {success && <p className="form-success">{success}</p>}
+
       <section className="stats-grid">
         <article className="stat-card">
-          <span>Total Treks</span>
+          <p>Total Treks</p>
           <strong>{stats.totalTreks}</strong>
-          <small>Treks available in the system</small>
+          <span>Treks available in the system</span>
         </article>
 
         <article className="stat-card">
-          <span>Total Users</span>
+          <p>Total Users</p>
           <strong>{stats.totalUsers}</strong>
-          <small>Registered trekkers</small>
+          <span>Registered trekkers</span>
         </article>
 
         <article className="stat-card">
-          <span>Pending Staff</span>
+          <p>Pending Staff</p>
           <strong>{stats.pendingStaff}</strong>
-          <small>Waiting for approval</small>
+          <span>Waiting for approval</span>
         </article>
 
         <article className="stat-card">
-          <span>Total Bookings</span>
+          <p>Total Bookings</p>
           <strong>{stats.totalBookings}</strong>
-          <small>Bookings received</small>
+          <span>Bookings received</span>
         </article>
       </section>
 
-      <section className="dashboard-panel">
-        <div className="panel-heading">
+      <section className="dashboard-section">
+        <div className="section-heading">
           <div>
-            <p className="eyebrow">
-              STAFF MANAGEMENT
-            </p>
+            <p className="eyebrow">STAFF MANAGEMENT</p>
             <h2>Pending requests</h2>
           </div>
 
           <button
-            className="refresh-button"
+            type="button"
+            className="secondary-button"
             onClick={fetchDashboardData}
             disabled={loading}
           >
@@ -141,50 +169,49 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {error && (
-          <p className="form-error">{error}</p>
-        )}
-
         {loading ? (
-          <p className="empty-state">
-            Loading requests...
-          </p>
-        ) : staff.length === 0 ? (
+          <p className="empty-state">Loading staff requests...</p>
+        ) : staffRequests.length === 0 ? (
           <p className="empty-state">
             No pending staff requests.
           </p>
         ) : (
-          <div className="dashboard-table-wrapper">
+          <div className="table-wrapper">
             <table className="dashboard-table">
               <thead>
                 <tr>
                   <th>Name</th>
                   <th>Email</th>
-                  <th>Requested</th>
+                  <th>Registered</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
 
               <tbody>
-                {staff.map((member) => (
-                  <tr key={member._id}>
-                    <td>{member.name}</td>
-                    <td>{member.email}</td>
+                {staffRequests.map((staff) => (
+                  <tr key={staff._id}>
+                    <td>{staff.name}</td>
+                    <td>{staff.email}</td>
                     <td>
                       {new Date(
-                        member.createdAt
+                        staff.createdAt
                       ).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <span className="status-badge pending">
+                        Pending
+                      </span>
                     </td>
                     <td>
                       <div className="table-actions">
                         <button
+                          type="button"
                           className="approve-button"
-                          disabled={
-                            actionId === member._id
-                          }
+                          disabled={updatingId === staff._id}
                           onClick={() =>
-                            updateStaff(
-                              member._id,
+                            updateStaffStatus(
+                              staff._id,
                               "approve"
                             )
                           }
@@ -193,13 +220,12 @@ function AdminDashboard() {
                         </button>
 
                         <button
+                          type="button"
                           className="reject-button"
-                          disabled={
-                            actionId === member._id
-                          }
+                          disabled={updatingId === staff._id}
                           onClick={() =>
-                            updateStaff(
-                              member._id,
+                            updateStaffStatus(
+                              staff._id,
                               "reject"
                             )
                           }

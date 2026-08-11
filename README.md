@@ -1,6 +1,6 @@
-# TrekMate AI
+# TREKMATE
 
-TrekMate AI is a full-stack trekking management platform with role-based dashboards, trek booking, staff management and an AI-powered travel assistant.
+TREKMATE is a full-stack trekking management platform with role-based dashboards, trek booking, staff management and an AI-powered travel assistant.
 
 ## Features
 
@@ -12,7 +12,7 @@ TrekMate AI is a full-stack trekking management platform with role-based dashboa
 - View and cancel active bookings
 - View completed trekking history
 - Access a personalized dashboard
-- Ask trekking and travel questions through TrekMate AI
+- Ask trekking and travel questions through TREKMATE
 
 ### Trek Staff
 
@@ -78,7 +78,7 @@ TrekMate AI is a full-stack trekking management platform with role-based dashboa
 ## Project Structure
 
 ```text
-trekmate-ai/
+TREKMATE-ai/
 ├── client/
 │   ├── public/
 │   └── src/
@@ -116,7 +116,7 @@ trekmate-ai/
 
 ```bash
 git clone YOUR_REPOSITORY_URL
-cd trekmate-ai
+cd TREKMATE-ai
 ```
 
 ### 2. Configure the backend
@@ -139,7 +139,7 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_long_random_jwt_secret
 JWT_EXPIRES_IN=7d
 
-ADMIN_NAME=TrekMate Admin
+ADMIN_NAME=TREKMATE Admin
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=your_strong_admin_password
 
@@ -249,7 +249,7 @@ client/dist
 
 ## Important Notes
 
-- TrekMate AI does not provide live weather, permit or route-closure information.
+- TREKMATE does not provide live weather, permit or route-closure information.
 - Users should verify current conditions from official sources.
 - Groq API usage is subject to the limits of the configured Groq account.
 - Admin credentials and API keys must remain inside the private `.env` file.

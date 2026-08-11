@@ -3,18 +3,24 @@ import {
   Route,
   Routes,
 } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Chat from "./pages/Chat";
+
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminTreks from "./pages/AdminTreks";
 import AdminTrekForm from "./pages/AdminTrekForm";
 import AdminBookings from "./pages/AdminBookings";
+import AdminAccounts from "./pages/AdminAccounts";
+
 import StaffDashboard from "./pages/StaffDashboard";
+
 import UserDashboard from "./pages/UserDashboard";
 import UserTreks from "./pages/UserTreks";
 import UserBookings from "./pages/UserBookings";
 import UserHistory from "./pages/UserHistory";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 const adminRoute = (component) => (
@@ -34,18 +40,13 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={
-          <Navigate to="/login" replace />
-        }
+        element={<Navigate to="/login" replace />}
       />
 
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-      <Route
-        path="/register"
-        element={<Register />}
-      />
-
+      {/* Admin routes */}
       <Route
         path="/admin"
         element={adminRoute(<AdminDashboard />)}
@@ -77,6 +78,21 @@ function App() {
       />
 
       <Route
+        path="/admin/users"
+        element={adminRoute(
+          <AdminAccounts accountRole="user" />
+        )}
+      />
+
+      <Route
+        path="/admin/team"
+        element={adminRoute(
+          <AdminAccounts accountRole="staff" />
+        )}
+      />
+
+      {/* Staff routes */}
+      <Route
         path="/staff/*"
         element={
           <ProtectedRoute allowedRoles={["staff"]}>
@@ -85,6 +101,7 @@ function App() {
         }
       />
 
+      {/* User routes */}
       <Route
         path="/dashboard"
         element={userRoute(<UserDashboard />)}
@@ -105,6 +122,7 @@ function App() {
         element={userRoute(<UserHistory />)}
       />
 
+      {/* AI assistant */}
       <Route
         path="/chat"
         element={
@@ -116,9 +134,7 @@ function App() {
 
       <Route
         path="*"
-        element={
-          <Navigate to="/login" replace />
-        }
+        element={<Navigate to="/login" replace />}
       />
     </Routes>
   );

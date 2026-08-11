@@ -29,6 +29,14 @@ export const protect = async (req, res, next) => {
       });
     }
 
+    if (user.isBlacklisted) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Your account has been blacklisted. Contact the administrator.",
+      });
+    }
+
     if (!user.isApproved) {
       return res.status(403).json({
         success: false,

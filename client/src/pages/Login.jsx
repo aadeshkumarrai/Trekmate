@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -46,8 +47,9 @@ function Login() {
 
   return (
     <main className="auth-page">
+      <BrandLogo />
       <section className="auth-card">
-        <p className="eyebrow">TREKMATE AI</p>
+        <p className="eyebrow">TREKMATE</p>
         <h1>Welcome back</h1>
         <p className="auth-subtitle">
           Login and continue your travel conversations.
@@ -86,7 +88,7 @@ function Login() {
         </form>
 
         <p className="auth-switch">
-          New to TrekMate? <Link to="/register">Create an account</Link>
+          New to TREKMATE? <Link to="/register">Create an account</Link>
         </p>
       </section>
     </main>

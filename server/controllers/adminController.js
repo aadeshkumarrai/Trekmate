@@ -2,6 +2,10 @@ import User from "../models/User.js";
 import Trek from "../models/Trek.js";
 import Booking from "../models/Booking.js";
 
+const accountFields =
+  "name email role isApproved approvalStatus isBlacklisted profileImage createdAt";
+
+// GET /api/admin/staff?status=pending
 export const getStaff = async (req, res) => {
   try {
     const { status = "pending" } = req.query;
@@ -31,9 +35,7 @@ export const getStaff = async (req, res) => {
     }
 
     const staff = await User.find(filter)
-      .select(
-        "name email role isApproved approvalStatus profileImage createdAt"
-      )
+      .select(accountFields)
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -42,7 +44,7 @@ export const getStaff = async (req, res) => {
       staff,
     });
   } catch (error) {
-    console.error(`Fetch staff failed: ${error.message}`);
+    console.error("Unable to fetch staff:", error);
 
     return res.status(500).json({
       success: false,
@@ -51,12 +53,26 @@ export const getStaff = async (req, res) => {
   }
 };
 
+// PATCH /api/admin/staff/:id/approve
 export const approveStaff = async (req, res) => {
   try {
-    const staff = await User.findOne({
-      _id: req.params.id,
-      role: "staff",
-    });
+    const staff = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        role: "staff",
+      },
+      {
+        $set: {
+          isApproved: true,
+          approvalStatus: "approved",
+          isBlacklisted: false,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select(accountFields);
 
     if (!staff) {
       return res.status(404).json({
@@ -65,17 +81,13 @@ export const approveStaff = async (req, res) => {
       });
     }
 
-    staff.isApproved = true;
-    staff.approvalStatus = "approved";
-    await staff.save();
-
     return res.status(200).json({
       success: true,
       message: "Staff account approved successfully",
       staff,
     });
   } catch (error) {
-    console.error(`Approve staff failed: ${error.message}`);
+    console.error("Unable to approve staff:", error);
 
     return res.status(500).json({
       success: false,
@@ -84,12 +96,25 @@ export const approveStaff = async (req, res) => {
   }
 };
 
+// PATCH /api/admin/staff/:id/reject
 export const rejectStaff = async (req, res) => {
   try {
-    const staff = await User.findOne({
-      _id: req.params.id,
-      role: "staff",
-    });
+    const staff = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        role: "staff",
+      },
+      {
+        $set: {
+          isApproved: false,
+          approvalStatus: "rejected",
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select(accountFields);
 
     if (!staff) {
       return res.status(404).json({
@@ -98,17 +123,13 @@ export const rejectStaff = async (req, res) => {
       });
     }
 
-    staff.isApproved = false;
-    staff.approvalStatus = "rejected";
-    await staff.save();
-
     return res.status(200).json({
       success: true,
-      message: "Staff account rejected",
+      message: "Staff account rejected successfully",
       staff,
     });
   } catch (error) {
-    console.error(`Reject staff failed: ${error.message}`);
+    console.error("Unable to reject staff:", error);
 
     return res.status(500).json({
       success: false,
@@ -116,8 +137,20 @@ export const rejectStaff = async (req, res) => {
     });
   }
 };
+
+// GET /api/admin/stats
 export const getDashboardStats = async (req, res) => {
   try {
+    const pendingStaffFilter = {
+      role: "staff",
+      isApproved: false,
+      $or: [
+        { approvalStatus: "pending" },
+        { approvalStatus: "not_required" },
+        { approvalStatus: { $exists: false } },
+      ],
+    };
+
     const [
       totalTreks,
       totalUsers,
@@ -126,10 +159,7 @@ export const getDashboardStats = async (req, res) => {
     ] = await Promise.all([
       Trek.countDocuments(),
       User.countDocuments({ role: "user" }),
-      User.countDocuments({
-        role: "staff",
-        approvalStatus: "pending",
-      }),
+      User.countDocuments(pendingStaffFilter),
       Booking.countDocuments(),
     ]);
 
@@ -143,11 +173,97 @@ export const getDashboardStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Dashboard stats error:", error);
+    console.error("Unable to fetch dashboard stats:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Unable to load dashboard statistics",
+      message: "Unable to fetch dashboard statistics",
+    });
+  }
+};
+
+// GET /api/admin/accounts?role=user
+// GET /api/admin/accounts?role=staff
+export const getAccounts = async (req, res) => {
+  try {
+    const { role } = req.query;
+
+    if (!["user", "staff"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Role must be user or staff",
+      });
+    }
+
+    const accounts = await User.find({ role })
+      .select(accountFields)
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      count: accounts.length,
+      accounts,
+    });
+  } catch (error) {
+    console.error("Unable to fetch accounts:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch accounts",
+    });
+  }
+};
+
+// PATCH /api/admin/accounts/:id/blacklist
+export const updateBlacklistStatus = async (req, res) => {
+  try {
+    const { isBlacklisted } = req.body;
+
+    if (typeof isBlacklisted !== "boolean") {
+      return res.status(400).json({
+        success: false,
+        message: "isBlacklisted must be true or false",
+      });
+    }
+
+    const account = await User.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        role: {
+          $in: ["user", "staff"],
+        },
+      },
+      {
+        $set: {
+          isBlacklisted,
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select(accountFields);
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        message: "Account not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: isBlacklisted
+        ? "Account added to blacklist"
+        : "Account removed from blacklist",
+      account,
+    });
+  } catch (error) {
+    console.error("Unable to update blacklist status:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update blacklist status",
     });
   }
 };

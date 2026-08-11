@@ -11,7 +11,7 @@ const welcomeMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Namaste! Main TrekMate AI hoon. Trek, destination, budget, packing ya travel planning ke baare mein kuch bhi poochho.",
+    "Namaste! Main TREKMATE hoon. Trek, destination, budget, packing ya travel planning ke baare mein kuch bhi poochho.",
 };
 
 const suggestions = [
@@ -194,7 +194,7 @@ function Chat() {
     <main className="chat-page">
       <header className="chat-header">
         <div>
-          <p className="eyebrow">TREKMATE AI</p>
+          <p className="eyebrow">TREKMATE</p>
           <h1>Hello, {user?.name}</h1>
         </div>
 
@@ -249,7 +249,7 @@ function Chat() {
                   <span className="message-author">
                     {message.role === "user"
                       ? "You"
-                      : "TrekMate"}
+                      : "TREKMATE"}
                   </span>
 
                   <p>{message.content}</p>
@@ -276,7 +276,7 @@ function Chat() {
               {sending && (
                 <article className="message assistant">
                   <span className="message-author">
-                    TrekMate
+                    TREKMATE
                   </span>
                   <p className="typing">
                     Thinking...

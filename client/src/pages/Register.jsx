@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -69,8 +70,9 @@ function Register() {
 
   return (
     <main className="auth-page">
+      <BrandLogo />
       <section className="auth-card">
-        <p className="eyebrow">TREKMATE AI</p>
+        <p className="eyebrow">TREKMATE</p>
         <h1>Create account</h1>
         <p className="auth-subtitle">
           Join as a trekker or apply as trek staff.

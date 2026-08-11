@@ -20,9 +20,19 @@ const navigation = [
     icon: "▣",
   },
   {
+    label: "Users",
+    path: "/admin/users",
+    icon: "◎",
+  },
+  {
+    label: "Staff",
+    path: "/admin/team",
+    icon: "♙",
+  },
+  {
     label: "Staff Requests",
     path: "/admin/staff",
-    icon: "♙",
+    icon: "♧",
   },
   {
     label: "AI Assistant",
@@ -43,9 +53,7 @@ function AdminBookings() {
       setLoading(true);
       setError("");
 
-      const { data } = await api.get(
-        "/bookings/admin/all"
-      );
+      const { data } = await api.get("/bookings/admin/all");
 
       setBookings(data.bookings);
     } catch (requestError) {
@@ -67,8 +75,7 @@ function AdminBookings() {
 
     return bookings.filter((booking) => {
       const matchesStatus =
-        status === "all" ||
-        booking.status === status;
+        status === "all" || booking.status === status;
 
       const matchesSearch =
         !query ||
@@ -101,9 +108,7 @@ function AdminBookings() {
       <section className="dashboard-panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">
-              BOOKING MANAGEMENT
-            </p>
+            <p className="eyebrow">BOOKING MANAGEMENT</p>
             <h2>All bookings</h2>
           </div>
 
@@ -132,22 +137,14 @@ function AdminBookings() {
               setStatus(event.target.value)
             }
           >
-            <option value="all">
-              All statuses
-            </option>
+            <option value="all">All statuses</option>
             <option value="booked">Booked</option>
-            <option value="cancelled">
-              Cancelled
-            </option>
-            <option value="completed">
-              Completed
-            </option>
+            <option value="cancelled">Cancelled</option>
+            <option value="completed">Completed</option>
           </select>
         </div>
 
-        {error && (
-          <p className="form-error">{error}</p>
-        )}
+        {error && <p className="form-error">{error}</p>}
 
         {loading ? (
           <p className="empty-state">
@@ -182,14 +179,11 @@ function AdminBookings() {
                       {booking.user?.email || "—"}
                     </td>
                     <td>
-                      {booking.trek?.name ||
-                        "Deleted trek"}
+                      {booking.trek?.name || "Deleted trek"}
                     </td>
                     <td>{booking.participants}</td>
                     <td>
-                      {formatCurrency(
-                        booking.totalAmount
-                      )}
+                      {formatCurrency(booking.totalAmount)}
                     </td>
                     <td>
                       {new Date(

@@ -21,9 +21,19 @@ const navigation = [
     icon: "▣",
   },
   {
+    label: "Users",
+    path: "/admin/users",
+    icon: "◎",
+  },
+  {
+    label: "Staff",
+    path: "/admin/team",
+    icon: "♙",
+  },
+  {
     label: "Staff Requests",
     path: "/admin/staff",
-    icon: "♙",
+    icon: "♧",
   },
   {
     label: "AI Assistant",

@@ -13,7 +13,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (loading) {
     return (
       <main className="loading-page">
-        <p>Loading TrekMate AI...</p>
+        <p>Loading TREKMATE...</p>
       </main>
     );
   }

@@ -8,7 +8,7 @@ const getGroqClient = () => {
 };
 
 const systemPrompt = `
-You are TrekMate AI, a helpful travel and trekking assistant.
+You are TREKMATE, a helpful travel and trekking assistant.
 
 Give clear, practical and concise answers about:
 - Trek planning and preparation

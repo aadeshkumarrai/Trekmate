@@ -2,22 +2,33 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 const createToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  });
+  return jwt.sign(
+    { id: userId },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    }
+  );
 };
 
 const getCookieOptions = () => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite:
-    process.env.NODE_ENV === "production" ? "none" : "lax",
+    process.env.NODE_ENV === "production"
+      ? "none"
+      : "lax",
 });
 
-const sendTokenResponse = (user, statusCode, message, res) => {
+const sendTokenResponse = (
+  user,
+  statusCode,
+  message,
+  res
+) => {
   const token = createToken(user._id);
 
-  res
+  return res
     .status(statusCode)
     .cookie("token", token, {
       ...getCookieOptions(),
@@ -32,6 +43,8 @@ const sendTokenResponse = (user, statusCode, message, res) => {
         email: user.email,
         role: user.role,
         isApproved: user.isApproved,
+        approvalStatus: user.approvalStatus,
+        isBlacklisted: user.isBlacklisted,
         profileImage: user.profileImage,
       },
     });
@@ -49,7 +62,8 @@ export const register = async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, email and password are required",
+        message:
+          "Name, email and password are required",
       });
     }
 
@@ -62,7 +76,9 @@ export const register = async (req, res) => {
       });
     }
 
-    const normalizedEmail = email.toLowerCase().trim();
+    const normalizedEmail = email
+      .toLowerCase()
+      .trim();
 
     const existingUser = await User.findOne({
       email: normalizedEmail,
@@ -71,20 +87,24 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message: "User with this email already exists",
+        message:
+          "User with this email already exists",
       });
     }
 
     const user = await User.create({
-        name,
-        email: normalizedEmail,
-        password,
-        role,
-        isApproved: role === "user",
-        approvalStatus:
-        role === "staff" ? "pending" : "not_required",
+      name,
+      email: normalizedEmail,
+      password,
+      role,
+      isApproved: role === "user",
+      approvalStatus:
+        role === "staff"
+          ? "pending"
+          : "not_required",
+      isBlacklisted: false,
     });
-    
+
     if (role === "staff") {
       return res.status(201).json({
         success: true,
@@ -96,6 +116,8 @@ export const register = async (req, res) => {
           email: user.email,
           role: user.role,
           isApproved: user.isApproved,
+          approvalStatus: user.approvalStatus,
+          isBlacklisted: user.isBlacklisted,
         },
       });
     }
@@ -107,17 +129,22 @@ export const register = async (req, res) => {
       res
     );
   } catch (error) {
-    console.error("Registration failed:", error);
+    console.error(
+      "Registration failed:",
+      error
+    );
 
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
-        message: "User with this email already exists",
+        message:
+          "User with this email already exists",
       });
     }
 
     if (error.name === "ValidationError") {
-      const firstError = Object.values(error.errors)[0];
+      const firstError =
+        Object.values(error.errors)[0];
 
       return res.status(400).json({
         success: false,
@@ -139,7 +166,8 @@ export const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required",
+        message:
+          "Email and password are required",
       });
     }
 
@@ -147,17 +175,29 @@ export const login = async (req, res) => {
       email: email.toLowerCase().trim(),
     }).select("+password");
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (
+      !user ||
+      !(await user.comparePassword(password))
+    ) {
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
       });
     }
 
+    if (user.isBlacklisted) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Your account has been blacklisted. Contact the administrator.",
+      });
+    }
+
     if (!user.isApproved) {
       return res.status(403).json({
         success: false,
-        message: "Your account is waiting for admin approval",
+        message:
+          "Your account is waiting for admin approval",
       });
     }
 
@@ -180,7 +220,10 @@ export const login = async (req, res) => {
 export const logout = (req, res) => {
   return res
     .status(200)
-    .clearCookie("token", getCookieOptions())
+    .clearCookie(
+      "token",
+      getCookieOptions()
+    )
     .json({
       success: true,
       message: "Logout successful",
@@ -196,7 +239,12 @@ export const getMe = async (req, res) => {
       email: req.user.email,
       role: req.user.role,
       isApproved: req.user.isApproved,
-      profileImage: req.user.profileImage,
+      approvalStatus:
+        req.user.approvalStatus,
+      isBlacklisted:
+        req.user.isBlacklisted,
+      profileImage:
+        req.user.profileImage,
     },
   });
 };

@@ -87,7 +87,7 @@ app.use("/api/bookings", bookingRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Welcome to TrekMate AI API",
+    message: "Welcome to TREKMATE API",
   });
 });
 
@@ -98,7 +98,7 @@ app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
     status: "healthy",
-    project: "TrekMate AI",
+    project: "TREKMATE",
     database: databaseConnected
       ? "connected"
       : "disconnected",
@@ -137,7 +137,7 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       console.log(
-        `TrekMate AI server is running on port ${PORT}`
+        `TREKMATE server is running on port ${PORT}`
       );
     });
   } catch (error) {

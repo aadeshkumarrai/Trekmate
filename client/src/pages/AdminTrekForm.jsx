@@ -24,9 +24,19 @@ const navigation = [
     icon: "▣",
   },
   {
+    label: "Users",
+    path: "/admin/users",
+    icon: "◎",
+  },
+  {
+    label: "Staff",
+    path: "/admin/team",
+    icon: "♙",
+  },
+  {
     label: "Staff Requests",
     path: "/admin/staff",
-    icon: "♙",
+    icon: "♧",
   },
   {
     label: "AI Assistant",
@@ -94,8 +104,7 @@ function AdminTrekForm() {
             totalSlots: trek.totalSlots,
             startDate: trek.startDate.slice(0, 10),
             endDate: trek.endDate.slice(0, 10),
-            assignedStaff:
-              trek.assignedStaff?._id || "",
+            assignedStaff: trek.assignedStaff?._id || "",
             status: trek.status,
             description: trek.description,
             image: trek.image || "",
@@ -193,9 +202,7 @@ function AdminTrekForm() {
                   onChange={handleChange}
                 >
                   <option value="easy">Easy</option>
-                  <option value="moderate">
-                    Moderate
-                  </option>
+                  <option value="moderate">Moderate</option>
                   <option value="hard">Hard</option>
                 </select>
               </label>

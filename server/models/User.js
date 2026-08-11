@@ -43,6 +43,11 @@ const userSchema = new mongoose.Schema(
       default: "not_required",
     },
 
+    isBlacklisted: {
+      type: Boolean,
+      default: false,
+    },
+
     profileImage: {
       type: String,
       default: "",
@@ -53,13 +58,11 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Save karne se pehle password ko hash karega
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 
-// Login ke waqt password compare karega
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return bcrypt.compare(enteredPassword, this.password);
 };

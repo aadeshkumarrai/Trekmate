@@ -1,20 +1,28 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-import {
-  NavLink,
-  useNavigate,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+
+const sidebarIcons = {
+  Dashboard: "⌂",
+  Treks: "△",
+  Bookings: "▣",
+  Users: "◎",
+  Staff: "♟",
+  "Staff Requests": "♧",
+  "AI Assistant": "✦",
+  "My Treks": "△",
+  Participants: "♙",
+  "Browse Treks": "△",
+  "My Bookings": "▣",
+  "Trekking History": "↻",
+};
 
 function DashboardLayout({
   title,
   navigation,
   children,
 }) {
-  const [menuOpen, setMenuOpen] =
-    useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,24 +40,12 @@ function DashboardLayout({
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown
-    );
-    window.addEventListener(
-      "resize",
-      handleResize
-    );
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown
-      );
-      window.removeEventListener(
-        "resize",
-        handleResize
-      );
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -86,11 +82,10 @@ function DashboardLayout({
         }`}
       >
         <div className="dashboard-brand">
-          <span>TM</span>
+          <span>T</span>
 
           <div>
-            <strong>TrekMate</strong>
-            <small>Management</small>
+            <strong>TREKMATE</strong>
           </div>
 
           <button
@@ -114,7 +109,12 @@ function DashboardLayout({
                 isActive ? "active" : ""
               }
             >
-              <span>{item.icon}</span>
+              <span aria-hidden="true">
+                {sidebarIcons[item.label] ||
+                  item.icon ||
+                  "•"}
+              </span>
+
               {item.label}
             </NavLink>
           ))}
@@ -162,7 +162,13 @@ function DashboardLayout({
             </span>
 
             <div>
-              <strong>{user?.name}</strong>
+              <strong>
+                {user?.name?.replace(
+                  /trekmate/gi,
+                  "TREKMATE"
+                )}
+              </strong>
+
               <small>{user?.role}</small>
             </div>
           </div>

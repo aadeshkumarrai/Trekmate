@@ -6,7 +6,7 @@ const createToken = (userId) => {
     { id: userId },
     process.env.JWT_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+      expiresIn: process.env.JWT_EXPIRES_IN || "3h",
     }
   );
 };
@@ -32,7 +32,7 @@ const sendTokenResponse = (
     .status(statusCode)
     .cookie("token", token, {
       ...getCookieOptions(),
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 3 * 60 * 60 * 1000,
     })
     .json({
       success: true,
@@ -62,8 +62,7 @@ export const register = async (req, res) => {
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message:
-          "Name, email and password are required",
+        message: "Name, email and password are required",
       });
     }
 
@@ -76,9 +75,7 @@ export const register = async (req, res) => {
       });
     }
 
-    const normalizedEmail = email
-      .toLowerCase()
-      .trim();
+    const normalizedEmail = email.toLowerCase().trim();
 
     const existingUser = await User.findOne({
       email: normalizedEmail,
@@ -87,8 +84,7 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.status(409).json({
         success: false,
-        message:
-          "User with this email already exists",
+        message: "User with this email already exists",
       });
     }
 
@@ -103,6 +99,7 @@ export const register = async (req, res) => {
           ? "pending"
           : "not_required",
       isBlacklisted: false,
+      isEmailVerified: true,
     });
 
     if (role === "staff") {
@@ -129,22 +126,17 @@ export const register = async (req, res) => {
       res
     );
   } catch (error) {
-    console.error(
-      "Registration failed:",
-      error
-    );
+    console.error("Registration failed:", error);
 
     if (error.code === 11000) {
       return res.status(409).json({
         success: false,
-        message:
-          "User with this email already exists",
+        message: "User with this email already exists",
       });
     }
 
     if (error.name === "ValidationError") {
-      const firstError =
-        Object.values(error.errors)[0];
+      const firstError = Object.values(error.errors)[0];
 
       return res.status(400).json({
         success: false,
@@ -166,8 +158,7 @@ export const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message:
-          "Email and password are required",
+        message: "Email and password are required",
       });
     }
 
@@ -239,12 +230,9 @@ export const getMe = async (req, res) => {
       email: req.user.email,
       role: req.user.role,
       isApproved: req.user.isApproved,
-      approvalStatus:
-        req.user.approvalStatus,
-      isBlacklisted:
-        req.user.isBlacklisted,
-      profileImage:
-        req.user.profileImage,
+      approvalStatus: req.user.approvalStatus,
+      isBlacklisted: req.user.isBlacklisted,
+      profileImage: req.user.profileImage,
     },
   });
 };

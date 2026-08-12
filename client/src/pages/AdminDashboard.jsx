@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/axios";
 import DashboardLayout from "../components/DashboardLayout";
 
@@ -49,29 +50,21 @@ const initialStats = {
 };
 
 function AdminDashboard() {
-  const [staffRequests, setStaffRequests] = useState([]);
   const [stats, setStats] = useState(initialStats);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardStats = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const [staffResponse, statsResponse] = await Promise.all([
-        api.get("/admin/staff?status=pending"),
-        api.get("/admin/stats"),
-      ]);
-
-      setStaffRequests(staffResponse.data.staff || []);
+      const statsResponse = await api.get("/admin/stats");
       setStats(statsResponse.data.stats || initialStats);
     } catch (requestError) {
       setError(
         requestError.response?.data?.message ||
-          "Unable to load admin dashboard"
+          "Unable to load admin dashboard overview"
       );
     } finally {
       setLoading(false);
@@ -79,43 +72,8 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchDashboardStats();
   }, []);
-
-  const updateStaffStatus = async (staffId, action) => {
-    setUpdatingId(staffId);
-    setError("");
-    setSuccess("");
-
-    try {
-      const { data } = await api.patch(
-        `/admin/staff/${staffId}/${action}`
-      );
-
-      setSuccess(data.message);
-
-      setStaffRequests((currentRequests) =>
-        currentRequests.filter(
-          (request) => request._id !== staffId
-        )
-      );
-
-      setStats((currentStats) => ({
-        ...currentStats,
-        pendingStaff: Math.max(
-          0,
-          currentStats.pendingStaff - 1
-        ),
-      }));
-    } catch (requestError) {
-      setError(
-        requestError.response?.data?.message ||
-          `Unable to ${action} staff request`
-      );
-    } finally {
-      setUpdatingId("");
-    }
-  };
 
   return (
     <DashboardLayout
@@ -124,122 +82,123 @@ function AdminDashboard() {
       title="Admin Dashboard"
     >
       {error && <p className="form-error">{error}</p>}
-      {success && <p className="form-success">{success}</p>}
 
+      {/* Prominent High-Level Stats Overview */}
       <section className="stats-grid">
-        <article className="stat-card">
+        <article className="stat-card highlight">
           <p>Total Treks</p>
           <strong>{stats.totalTreks}</strong>
-          <span>Treks available in the system</span>
+          <span>Treks active in system</span>
         </article>
 
-        <article className="stat-card">
-          <p>Total Users</p>
+        <article className="stat-card highlight">
+          <p>Registered Trekkers</p>
           <strong>{stats.totalUsers}</strong>
-          <span>Registered trekkers</span>
+          <span>Total user accounts</span>
         </article>
 
-        <article className="stat-card">
-          <p>Pending Staff</p>
+        <article className="stat-card highlight">
+          <p>Pending Staff Requests</p>
           <strong>{stats.pendingStaff}</strong>
-          <span>Waiting for approval</span>
+          <span>Applications awaiting review</span>
         </article>
 
-        <article className="stat-card">
+        <article className="stat-card highlight">
           <p>Total Bookings</p>
           <strong>{stats.totalBookings}</strong>
-          <span>Bookings received</span>
+          <span>Reservations processed</span>
         </article>
       </section>
 
-      <section className="dashboard-section">
-        <div className="section-heading">
+      {/* Action Banner for Pending Requests if any */}
+      {stats.pendingStaff > 0 && (
+        <section className="notice-banner">
+          <div className="notice-content">
+            <span className="notice-badge">{stats.pendingStaff} Pending</span>
+            <div>
+              <h3>Staff Applications Requiring Approval</h3>
+              <p>You have {stats.pendingStaff} staff membership application(s) waiting for admin verification.</p>
+            </div>
+          </div>
+          <Link to="/admin/staff" className="primary-action">
+            Review Applications →
+          </Link>
+        </section>
+      )}
+
+      {/* Quick Access Control Hub */}
+      <section className="dashboard-panel">
+        <div className="panel-heading">
           <div>
-            <p className="eyebrow">STAFF MANAGEMENT</p>
-            <h2>Pending requests</h2>
+            <p className="eyebrow">SYSTEM OVERVIEW</p>
+            <h2>Admin Control Hub</h2>
           </div>
 
           <button
             type="button"
             className="secondary-button"
-            onClick={fetchDashboardData}
+            onClick={fetchDashboardStats}
             disabled={loading}
           >
-            {loading ? "Loading..." : "Refresh"}
+            {loading ? "Loading..." : "Refresh Stats"}
           </button>
         </div>
 
-        {loading ? (
-          <p className="empty-state">Loading staff requests...</p>
-        ) : staffRequests.length === 0 ? (
-          <p className="empty-state">
-            No pending staff requests.
-          </p>
-        ) : (
-          <div className="table-wrapper">
-            <table className="dashboard-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Registered</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
+        <div className="quick-nav-grid">
+          <Link to="/admin/treks" className="quick-nav-card">
+            <span className="quick-nav-icon">△</span>
+            <div className="quick-nav-info">
+              <h3>Trek Management</h3>
+              <p>Create, edit, and update available trek listings and slots.</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
 
-              <tbody>
-                {staffRequests.map((staff) => (
-                  <tr key={staff._id}>
-                    <td>{staff.name}</td>
-                    <td>{staff.email}</td>
-                    <td>
-                      {new Date(
-                        staff.createdAt
-                      ).toLocaleDateString()}
-                    </td>
-                    <td>
-                      <span className="status-badge pending">
-                        Pending
-                      </span>
-                    </td>
-                    <td>
-                      <div className="table-actions">
-                        <button
-                          type="button"
-                          className="approve-button"
-                          disabled={updatingId === staff._id}
-                          onClick={() =>
-                            updateStaffStatus(
-                              staff._id,
-                              "approve"
-                            )
-                          }
-                        >
-                          Approve
-                        </button>
+          <Link to="/admin/bookings" className="quick-nav-card">
+            <span className="quick-nav-icon">▣</span>
+            <div className="quick-nav-info">
+              <h3>Bookings Center</h3>
+              <p>Track all trekker reservations and booking statuses.</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
 
-                        <button
-                          type="button"
-                          className="reject-button"
-                          disabled={updatingId === staff._id}
-                          onClick={() =>
-                            updateStaffStatus(
-                              staff._id,
-                              "reject"
-                            )
-                          }
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          <Link to="/admin/users" className="quick-nav-card">
+            <span className="quick-nav-icon">♙</span>
+            <div className="quick-nav-info">
+              <h3>User Directory</h3>
+              <p>Manage user accounts, view profiles, and monitor blacklists.</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
+
+          <Link to="/admin/team" className="quick-nav-card">
+            <span className="quick-nav-icon">♟</span>
+            <div className="quick-nav-info">
+              <h3>Staff Team Roster</h3>
+              <p>View verified staff members and assigned responsibilities.</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
+
+          <Link to="/admin/staff" className="quick-nav-card">
+            <span className="quick-nav-icon">♧</span>
+            <div className="quick-nav-info">
+              <h3>Staff Applications</h3>
+              <p>Approve or reject pending staff registrations ({stats.pendingStaff} pending).</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
+
+          <Link to="/chat" className="quick-nav-card">
+            <span className="quick-nav-icon">✦</span>
+            <div className="quick-nav-info">
+              <h3>TrekMate AI Assistant</h3>
+              <p>Access AI travel planning and trek information assistant.</p>
+            </div>
+            <span className="quick-nav-arrow">→</span>
+          </Link>
+        </div>
       </section>
     </DashboardLayout>
   );

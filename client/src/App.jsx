@@ -9,6 +9,7 @@ import Register from "./pages/Register";
 import Chat from "./pages/Chat";
 
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminStaffRequests from "./pages/AdminStaffRequests";
 import AdminTreks from "./pages/AdminTreks";
 import AdminTrekForm from "./pages/AdminTrekForm";
 import AdminBookings from "./pages/AdminBookings";
@@ -54,7 +55,7 @@ function App() {
 
       <Route
         path="/admin/staff"
-        element={adminRoute(<AdminDashboard />)}
+        element={adminRoute(<AdminStaffRequests />)}
       />
 
       <Route

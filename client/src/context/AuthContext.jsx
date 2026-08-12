@@ -24,11 +24,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     const { data } = await api.post("/auth/register", formData);
-
     if (data.user?.isApproved === false) {
-        setUser(null);
-    } else {
-        setUser(data.user);
+      setUser(null);
+    } else if (data.user) {
+      setUser(data.user);
     }
     return data;
   };

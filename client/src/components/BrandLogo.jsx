@@ -1,13 +1,20 @@
 import { Link } from "react-router-dom";
+import trekmateLogo from "../assets/trekmate-logo.png";
 
-function BrandLogo() {
+function BrandLogo({ showText = true, className = "" }) {
   return (
-    <Link className="public-brand" to="/login">
-      <span className="public-brand-mark">TM</span>
+    <Link className={`public-brand ${className}`} to="/login">
+      <img
+        src={trekmateLogo}
+        alt="TrekMate Logo"
+        className="brand-logo-img"
+      />
 
-      <span className="public-brand-text">
-        <strong>TREKMATE</strong>
-      </span>
+      {showText && (
+        <span className="public-brand-text">
+          <strong>TREKMATE</strong>
+        </span>
+      )}
     </Link>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import trekmateLogo from "../assets/trekmate-logo.png";
 
 const sidebarIcons = {
   Dashboard: "⌂",
@@ -82,7 +83,11 @@ function DashboardLayout({
         }`}
       >
         <div className="dashboard-brand">
-          <span>T</span>
+          <img
+            src={trekmateLogo}
+            alt="TrekMate Logo"
+            className="sidebar-logo-img"
+          />
 
           <div>
             <strong>TREKMATE</strong>

@@ -752,6 +752,27 @@ p {
   padding: 4px 8px 28px;
 }
 
+.dashboard-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: opacity 160ms ease, filter 160ms ease;
+}
+
+.dashboard-brand-link:hover {
+  opacity: 0.9;
+  filter: drop-shadow(0 0 8px rgba(47, 143, 255, 0.3));
+}
+
+.dashboard-brand-link:focus-visible {
+  outline: 2px solid var(--primary-cyan);
+  outline-offset: 4px;
+}
+
 .dashboard-brand img {
   width: 44px;
   height: 44px;

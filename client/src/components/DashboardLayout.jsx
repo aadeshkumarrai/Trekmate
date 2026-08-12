@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import trekmateLogo from "../assets/trekmate-logo.png";
 
@@ -27,6 +27,12 @@ function DashboardLayout({
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const getDashboardPath = () => {
+    if (user?.role === "admin") return "/admin";
+    if (user?.role === "staff") return "/staff";
+    return "/dashboard";
+  };
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -83,15 +89,22 @@ function DashboardLayout({
         }`}
       >
         <div className="dashboard-brand">
-          <img
-            src={trekmateLogo}
-            alt="TrekMate Logo"
-            className="sidebar-logo-img"
-          />
+          <Link
+            to={getDashboardPath()}
+            className="dashboard-brand-link"
+            aria-label="Go to dashboard"
+            onClick={() => setMenuOpen(false)}
+          >
+            <img
+              src={trekmateLogo}
+              alt="TrekMate Logo"
+              className="sidebar-logo-img"
+            />
 
-          <div>
-            <strong>TREKMATE</strong>
-          </div>
+            <div>
+              <strong>TREKMATE</strong>
+            </div>
+          </Link>
 
           <button
             type="button"
